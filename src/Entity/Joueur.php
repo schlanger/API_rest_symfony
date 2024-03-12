@@ -12,32 +12,31 @@ class Joueur
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("joueur")]
+    #[Groups(["joueur", "equipe"])]
     private ?int $id = null;
 
-    #[Groups("joueur")]
+    #[Groups(["joueur", "equipe"])]
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("joueur")]
+    #[Groups(["joueur", "equipe"])]
     private ?string $prenom = null;
 
     #[ORM\Column]
-    #[Groups("joueur")]
+    #[Groups(["joueur", "equipe"])]
     private ?int $age = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("joueur")]
+    #[Groups(["joueur", "equipe"])]
     private ?string $sexe = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("joueur")]
+    #[Groups(["joueur", "equipe"])]
     private ?string $poste = null;
 
     #[ORM\ManyToOne(inversedBy: 'joueurs')]
-    #[Groups("joueur")]
-    private ?Equipe $equipe_id = null;
+    private ?Equipe $equipe = null;
 
     public function getId(): ?int
     {
@@ -104,14 +103,14 @@ class Joueur
         return $this;
     }
 
-    public function getEquipeId(): ?equipe
+    public function getEquipe(): ?equipe
     {
-        return $this->equipe_id;
+        return $this->equipe;
     }
 
-    public function setEquipeId(?equipe $equipe_id): static
+    public function setEquipe(?equipe $equipe): static
     {
-        $this->equipe_id = $equipe_id;
+        $this->equipe = $equipe;
 
         return $this;
     }

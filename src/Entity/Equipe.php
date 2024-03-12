@@ -14,22 +14,23 @@ class Equipe
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups("equipe")]
+    #[Groups(["equipe", "joueur"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("equipe")]
+    #[Groups(["equipe", "joueur"])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("equipe")]
+    #[Groups(["equipe", "joueur"])]
     private ?string $logo = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups("equipe")]
+    #[Groups(["equipe", "joueur"])]
     private ?string $surnom = null;
 
-    #[ORM\OneToMany(targetEntity: Joueur::class, mappedBy: 'equipe_id')]
+    #[ORM\OneToMany(targetEntity: Joueur::class, mappedBy: 'equipe')]
+    #[Groups(["equipe", "joueur"])]
     private Collection $joueurs;
 
     public function __construct()
@@ -90,7 +91,7 @@ class Equipe
     {
         if (!$this->joueurs->contains($joueur)) {
             $this->joueurs->add($joueur);
-            $joueur->setEquipeId($this);
+            $joueur->setEquipe($this);
         }
 
         return $this;
@@ -100,8 +101,8 @@ class Equipe
     {
         if ($this->joueurs->removeElement($joueur)) {
             // set the owning side to null (unless already changed)
-            if ($joueur->getEquipeId() === $this) {
-                $joueur->setEquipeId(null);
+            if ($joueur->getEquipe() === $this) {
+                $joueur->setEquipe(null);
             }
         }
 

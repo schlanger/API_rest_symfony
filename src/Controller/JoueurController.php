@@ -32,22 +32,22 @@ class JoueurController extends AbstractController
         $jsonBookList = $serializer->serialize($joueur, 'json',['groups' => 'joueur']);
         return new JsonResponse($jsonBookList, Response::HTTP_OK, [], true);
     }
-   #[Route('/api/joueur/delete/{id}', name: 'deleteJoueur',methods: ['DELETE'])]
+   #[Route('/api/joueur/{id}', name: 'deleteJoueur',methods: ['DELETE'])]
     public function deleteJoueur(Joueur $joueur,EntityManagerInterface $em) : JsonResponse {
         $em->remove($joueur);
         $em->flush();
         return new JsonResponse(null,Response::HTTP_NO_CONTENT);
    }
 
-    #[Route('/api/joueur/create', name: 'createJoueur',methods: ['POST'])]
+    #[Route('/api/joueur', name: 'createJoueur',methods: ['POST'])]
     public function createJoueur( Request $request, SerializerInterface $serializer,EntityManagerInterface $em,UrlGeneratorInterface $urlGenerator,EquipeRepository $equipeRepository) : JsonResponse {
         $joueur = $serializer->deserialize($request->getContent(),Joueur::class,'json');
 
         $content = $request->toArray();
 
-        $idEquipe = $content['equipe_id'] ?? 1;
+        $idEquipe = $content['equipe'];
 
-        $joueur->setEquipeId($equipeRepository->find($idEquipe));
+        $joueur->setEquipe($equipeRepository->find($idEquipe));
 
         $em->persist($joueur);
         $em->flush();
@@ -57,20 +57,23 @@ class JoueurController extends AbstractController
         return new JsonResponse($jsonJoueur,Response::HTTP_CREATED,["Location" => $location], true);
     }
 
-    #[Route('/api/joueur/update/{id}', name: 'updateJoueur',methods: ['PUT'])]
-    public function updateJoueur( Request $request, SerializerInterface $serializer,Joueur $currentJoueur,EntityManagerInterface $em,UrlGeneratorInterface $urlGenerator,EquipeRepository $equipeRepository) : JsonResponse {
-        $updatejoueur = $serializer->deserialize($request->getContent(),Joueur::class,'json',[AbstractNormalizer::OBJECT_TO_POPULATE => $currentJoueur]);
+    #[Route('/api/joueur/{id}', name: 'updateJoueur',methods: ['PUT'])]
+    public function updateJoueur( Request $request, SerializerInterface $serializer,Joueur $joueur,
+                                  EntityManagerInterface $em,UrlGeneratorInterface $urlGenerator,EquipeRepository $equipeRepository)
+    : JsonResponse {
+        $updatejoueur = $serializer->deserialize($request->getContent(),Joueur::class,'json',
+            [AbstractNormalizer::OBJECT_TO_POPULATE => $joueur]);
 
         $content = $request->toArray();
 
-        $idEquipe = $content['equipe_id'] ?? 1;
+        $idEquipe = $content['equipe'];
 
-        $updatejoueur->setEquipeId($equipeRepository->find($idEquipe));
+        $updatejoueur->setEquipe($equipeRepository->find($idEquipe));
 
         $em->persist($updatejoueur);
         $em->flush();
 
-        return new JsonResponse(null,JsonResponse::HTTP_NO_CONTENT);
+        return new JsonResponse($updatejoueur,JsonResponse::HTTP_OK);
     }
 
 
