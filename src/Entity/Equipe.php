@@ -6,6 +6,7 @@ use App\Repository\EquipeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: EquipeRepository::class)]
 class Equipe
@@ -13,18 +14,23 @@ class Equipe
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups("equipe")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("equipe")]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("equipe")]
     private ?string $logo = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups("equipe")]
     private ?string $surnom = null;
 
     #[ORM\OneToMany(targetEntity: Joueur::class, mappedBy: 'equipe_id')]
+    #[Groups("joueur_details")]
     private Collection $joueurs;
 
     public function __construct()
