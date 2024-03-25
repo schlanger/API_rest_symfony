@@ -15,6 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class JoueurController extends AbstractController
 {
@@ -40,7 +41,7 @@ class JoueurController extends AbstractController
    }
 
     #[Route('/api/joueur', name: 'createJoueur',methods: ['POST'])]
-    public function createJoueur( Request $request, SerializerInterface $serializer,EntityManagerInterface $em,UrlGeneratorInterface $urlGenerator,EquipeRepository $equipeRepository) : JsonResponse {
+    public function createJoueur( Request $request, SerializerInterface $serializer,EntityManagerInterface $em,UrlGeneratorInterface $urlGenerator,EquipeRepository $equipeRepository,ValidatorInterface $validator) : JsonResponse {
         $joueur = $serializer->deserialize($request->getContent(),Joueur::class,'json');
 
         $content = $request->toArray();
@@ -48,6 +49,13 @@ class JoueurController extends AbstractController
         $idEquipe = $content['equipe'];
 
         $joueur->setEquipe($equipeRepository->find($idEquipe));
+
+        // On vérifie les erreurs
+
+        $errors = $validator->validate($joueur);
+        if ( $errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors,'json'), JsonResponse::HTTP_BAD_REQUEST,[], true);
+        }
 
         $em->persist($joueur);
         $em->flush();

@@ -30,7 +30,7 @@ class Equipe
     private ?string $surnom = null;
 
     #[ORM\OneToMany(targetEntity: Joueur::class, mappedBy: 'equipe')]
-    #[Groups(["equipe", "joueur"])]
+    #[Groups(["equipe"])]
     private Collection $joueurs;
 
     public function __construct()

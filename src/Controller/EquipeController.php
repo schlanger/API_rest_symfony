@@ -33,7 +33,7 @@ class EquipeController extends AbstractController
         return new JsonResponse($jsonEquipeList, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/api/equipe/{id}', name: 'deleteJoueur',methods: ['DELETE'])]
+    #[Route('/api/equipe/{id}', name: 'deleteEquipe',methods: ['DELETE'])]
     public function deleteJoueur(Equipe $equipe,EntityManagerInterface $em) : JsonResponse {
         $em->remove($equipe);
         $em->flush();

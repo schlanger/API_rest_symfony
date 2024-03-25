@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\JoueurRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: JoueurRepository::class)]
 class Joueur
@@ -17,10 +18,15 @@ class Joueur
 
     #[Groups(["joueur", "equipe"])]
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le nom est obligatoire")]
+    #[Assert\Length(min: 2,max: 15, minMessage: "Le nom doit faire au moins {{limit}} caractères", maxMessage: "Le nom doit faire au plus {{limit}} caractères")]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(["joueur", "equipe"])]
+
+    #[Assert\NotBlank(message: "Le prénom est obligatoire")]
+    #[Assert\Length(min: 2,max: 15, minMessage: "Le prénom doit faire au moins {{limit}} caractères", maxMessage: "Le prénom doit faire au plus {{limit}} caractères")]
     private ?string $prenom = null;
 
     #[ORM\Column]
@@ -36,6 +42,7 @@ class Joueur
     private ?string $poste = null;
 
     #[ORM\ManyToOne(inversedBy: 'joueurs')]
+    #[Groups(["joueur"])]
     private ?Equipe $equipe = null;
 
     public function getId(): ?int
