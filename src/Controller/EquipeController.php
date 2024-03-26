@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -34,6 +35,7 @@ class EquipeController extends AbstractController
     }
 
     #[Route('/api/equipe/{id}', name: 'deleteEquipe',methods: ['DELETE'])]
+    #[IsGranted("ROLE_ADMIN", message: "Seul un admin peut supprimer une équipe")]
     public function deleteJoueur(Equipe $equipe,EntityManagerInterface $em) : JsonResponse {
         $em->remove($equipe);
         $em->flush();
@@ -41,6 +43,7 @@ class EquipeController extends AbstractController
     }
 
     #[Route('/api/equipe', name: 'createEquipe',methods: ['POST'])]
+    #[IsGranted("ROLE_ADMIN", message: "Seul un admin peut ajouter une équipe")]
     public function createEquipe( Request $request, SerializerInterface $serializer,EntityManagerInterface $em,UrlGeneratorInterface $urlGenerator,EquipeRepository $equipeRepository) : JsonResponse {
         $equipe = $serializer->deserialize($request->getContent(),Equipe::class,'json');
 
@@ -53,6 +56,7 @@ class EquipeController extends AbstractController
     }
 
     #[Route('/api/equipe/{id}', name: 'updateEquipe',methods: ['PUT'])]
+    #[IsGranted("ROLE_ADMIN", message: "Seul un admin peut modifier une équipe")]
     public function updateEquipe( Request $request, SerializerInterface $serializer,Equipe $equipe,
                                   EntityManagerInterface $em,UrlGeneratorInterface $urlGenerator,EquipeRepository $equipeRepository)
     : JsonResponse {

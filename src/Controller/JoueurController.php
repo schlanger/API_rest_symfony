@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -34,6 +35,7 @@ class JoueurController extends AbstractController
         return new JsonResponse($jsonBookList, Response::HTTP_OK, [], true);
     }
    #[Route('/api/joueur/{id}', name: 'deleteJoueur',methods: ['DELETE'])]
+   #[IsGranted("ROLE_ADMIN", message: "Seul un admin peut supprimer un joueur")]
     public function deleteJoueur(Joueur $joueur,EntityManagerInterface $em) : JsonResponse {
         $em->remove($joueur);
         $em->flush();
@@ -41,6 +43,7 @@ class JoueurController extends AbstractController
    }
 
     #[Route('/api/joueur', name: 'createJoueur',methods: ['POST'])]
+    #[IsGranted("ROLE_ADMIN", message: "Seul un admin peut ajouter un joueur")]
     public function createJoueur( Request $request, SerializerInterface $serializer,EntityManagerInterface $em,UrlGeneratorInterface $urlGenerator,EquipeRepository $equipeRepository,ValidatorInterface $validator) : JsonResponse {
         $joueur = $serializer->deserialize($request->getContent(),Joueur::class,'json');
 
@@ -66,6 +69,7 @@ class JoueurController extends AbstractController
     }
 
     #[Route('/api/joueur/{id}', name: 'updateJoueur',methods: ['PUT'])]
+    #[IsGranted("ROLE_ADMIN", message: "Seul un admin peut modifier un joueur")]
     public function updateJoueur( Request $request, SerializerInterface $serializer,Joueur $joueur,
                                   EntityManagerInterface $em,UrlGeneratorInterface $urlGenerator,EquipeRepository $equipeRepository)
     : JsonResponse {
