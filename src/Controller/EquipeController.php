@@ -7,6 +7,8 @@ use App\Entity\Joueur;
 use App\Repository\EquipeRepository;
 use App\Repository\JoueurRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +17,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class EquipeController extends AbstractController
 {
@@ -23,14 +26,16 @@ class EquipeController extends AbstractController
     public function getEquipeList(EquipeRepository $equipeRepository, SerializerInterface $serializer): JsonResponse
     {
         $EquipeList = $equipeRepository->findAll();
-        $jsonEquipeList = $serializer->serialize($EquipeList, 'json',['groups' => 'equipe']);
+        $context = SerializationContext::create()->setGroups(['equipe']);
+        $jsonEquipeList = $serializer->serialize($EquipeList, 'json',$context);
         return new JsonResponse($jsonEquipeList, Response::HTTP_OK, [], true);
     }
 
     #[Route('/api/equipe/{id}', name: 'detailEquipe',methods: ['GET'])]
     public function getEquipeById(Equipe $equipe, SerializerInterface $serializer): JsonResponse
     {
-        $jsonEquipeList = $serializer->serialize($equipe, 'json',['groups' => 'equipe']);
+        $context = SerializationContext::create()->setGroups(['equipe']);
+        $jsonEquipeList = $serializer->serialize($equipe, 'json',$context);
         return new JsonResponse($jsonEquipeList, Response::HTTP_OK, [], true);
     }
 
@@ -49,7 +54,8 @@ class EquipeController extends AbstractController
 
         $em->persist($equipe);
         $em->flush();
-        $jsonequipe = $serializer->serialize($equipe,'json',['groups'=> 'equipe']);
+        $context = SerializationContext::create()->setGroups(['equipe']);
+        $jsonequipe = $serializer->serialize($equipe,'json',$context);
 
         $location = $urlGenerator->generate('detailEquipe', ['id' => $equipe->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
         return new JsonResponse($jsonequipe,Response::HTTP_CREATED,["Location" => $location], true);
@@ -57,15 +63,26 @@ class EquipeController extends AbstractController
 
     #[Route('/api/equipe/{id}', name: 'updateEquipe',methods: ['PUT'])]
     #[IsGranted("ROLE_ADMIN", message: "Seul un admin peut modifier une équipe")]
-    public function updateEquipe( Request $request, SerializerInterface $serializer,Equipe $equipe,
-                                  EntityManagerInterface $em,UrlGeneratorInterface $urlGenerator,EquipeRepository $equipeRepository)
-    : JsonResponse {
-        $updateEquipe = $serializer->deserialize($request->getContent(),Equipe::class,'json',
-            [AbstractNormalizer::OBJECT_TO_POPULATE => $equipe]);
+    public function updateEquipe(Request $request, SerializerInterface $serializer, Equipe $currentEquipe, EntityManagerInterface $em, ValidatorInterface $validator, TagAwareCacheInterface $cache): JsonResponse
+    {
+        $newEquipe = $serializer->deserialize($request->getContent(), Equipe::class, 'json');
+        $currentEquipe->setNom($newEquipe->getNom());
+        $currentEquipe->setLogo($newEquipe->getLogo());
+        $currentEquipe->setSurnom($newEquipe->getSurnom());
 
-        $em->persist($updateEquipe);
+
+        // On vérifie les erreurs
+        $errors = $validator->validate($currentEquipe);
+        if ($errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
+
+        $em->persist($currentEquipe);
         $em->flush();
 
-        return new JsonResponse($updateEquipe,JsonResponse::HTTP_OK);
+        // On vide le cache.
+        $cache->invalidateTags(["EquipeCache"]);
+
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Entity;
 
 use App\Repository\JoueurRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: JoueurRepository::class)]
@@ -110,12 +110,12 @@ class Joueur
         return $this;
     }
 
-    public function getEquipe(): ?equipe
+    public function getEquipe(): ?Equipe
     {
         return $this->equipe;
     }
 
-    public function setEquipe(?equipe $equipe): static
+    public function setEquipe(?Equipe $equipe): static
     {
         $this->equipe = $equipe;
 
