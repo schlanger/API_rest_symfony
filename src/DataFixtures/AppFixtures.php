@@ -58,6 +58,7 @@ class AppFixtures extends Fixture
             $joueur->setAge(20 + $i);
             $joueur->setSexe("Sexe " . $i);
             $joueur->setPoste("Poste " . $i);
+            $joueur->setNumero($i);
             $joueur->setEquipe($listEquipe[array_rand($listEquipe)]);
             $manager->persist($joueur);
         }

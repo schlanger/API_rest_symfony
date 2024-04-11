@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Joueur;
 use App\Repository\EquipeRepository;
 use App\Repository\JoueurRepository;
+use App\Service\VersioningService;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializationContext;
@@ -43,9 +44,11 @@ class JoueurController extends AbstractController
     }
 
     #[Route('/api/joueur/{id}', name: 'detailJoueur',methods: ['GET'])]
-    public function getJoueurById(Joueur $joueur, SerializerInterface $serializer): JsonResponse
+    public function getJoueurById(Joueur $joueur, SerializerInterface $serializer,VersioningService $versioningService): JsonResponse
     {
+        $version = $versioningService->getVersion();
         $context = SerializationContext::create()->setGroups(['joueur']);
+        $context->setVersion($version);
         $jsonBookList = $serializer->serialize($joueur, 'json',$context);
         return new JsonResponse($jsonBookList, Response::HTTP_OK, [], true);
     }

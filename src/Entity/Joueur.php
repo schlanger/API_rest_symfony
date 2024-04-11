@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\JoueurRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Since;
 use Symfony\Component\Validator\Constraints as Assert;
 use Hateoas\Configuration\Annotation as Hateoas;
 
@@ -74,6 +75,11 @@ class Joueur
     #[ORM\ManyToOne(inversedBy: 'joueurs')]
     #[Groups(["joueur"])]
     private ?Equipe $equipe = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(["joueur", "equipe"])]
+    #[Since("2.0")]
+    private ?int $numero = null;
 
     public function getId(): ?int
     {
@@ -148,6 +154,18 @@ class Joueur
     public function setEquipe(?Equipe $equipe): static
     {
         $this->equipe = $equipe;
+
+        return $this;
+    }
+
+    public function getNumero(): ?int
+    {
+        return $this->numero;
+    }
+
+    public function setNumero(?int $numero): static
+    {
+        $this->numero = $numero;
 
         return $this;
     }
