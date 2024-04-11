@@ -6,6 +6,36 @@ use App\Repository\JoueurRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
+
+/**
+ * @Hateoas\Relation(
+ *      "self",
+ *      href = @Hateoas\Route(
+ *          "detailJoueur",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="joueur")
+ * )
+ *
+ * @Hateoas\Relation(
+ *       "delete",
+ *       href = @Hateoas\Route(
+ *           "deleteJoueur",
+ *           parameters = { "id" = "expr(object.getId())" },
+ *       ),
+ *       exclusion = @Hateoas\Exclusion(groups="joueur", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ *  )
+ *
+ * @Hateoas\Relation(
+ *       "update",
+ *       href = @Hateoas\Route(
+ *           "updateJoueur",
+ *           parameters = { "id" = "expr(object.getId())" },
+ *       ),
+ *       exclusion = @Hateoas\Exclusion(groups="joueur", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ *  )
+ */
 
 #[ORM\Entity(repositoryClass: JoueurRepository::class)]
 class Joueur

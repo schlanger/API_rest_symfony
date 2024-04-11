@@ -18,16 +18,27 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 class EquipeController extends AbstractController
 {
     #[Route('/api/equipe', name: 'app_equipe',methods: ['GET'])]
-    public function getEquipeList(EquipeRepository $equipeRepository, SerializerInterface $serializer): JsonResponse
+    public function getEquipeList(EquipeRepository $equipeRepository, SerializerInterface $serializer,Request $request,TagAwareCacheInterface $cache): JsonResponse
     {
-        $EquipeList = $equipeRepository->findAll();
-        $context = SerializationContext::create()->setGroups(['equipe']);
-        $jsonEquipeList = $serializer->serialize($EquipeList, 'json',$context);
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 3);
+
+        $idCache = "getEquipeList-" . $page . "-" . $limit;
+
+        $jsonEquipeList = $cache->get($idCache, function (ItemInterface $item) use ($equipeRepository, $page, $limit, $serializer) {
+            echo ("L'element n'est pas encore dans le cache !");
+            $item->tag("equipeCache");
+            $item->expiresAfter(60);
+            $equipeList = $equipeRepository->findAllWithPagination($page, $limit);
+            $context = SerializationContext::create()->setGroups(['equipe']);
+            return $serializer->serialize($equipeList, 'json',$context);
+        });
         return new JsonResponse($jsonEquipeList, Response::HTTP_OK, [], true);
     }
 
@@ -41,7 +52,8 @@ class EquipeController extends AbstractController
 
     #[Route('/api/equipe/{id}', name: 'deleteEquipe',methods: ['DELETE'])]
     #[IsGranted("ROLE_ADMIN", message: "Seul un admin peut supprimer une équipe")]
-    public function deleteJoueur(Equipe $equipe,EntityManagerInterface $em) : JsonResponse {
+    public function deleteJoueur(Equipe $equipe,EntityManagerInterface $em,TagAwareCacheInterface $cache) : JsonResponse {
+        $cache->invalidateTags(["equipeCache"]);
         $em->remove($equipe);
         $em->flush();
         return new JsonResponse(null,Response::HTTP_NO_CONTENT);

@@ -7,6 +7,36 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
+use Hateoas\Configuration\Annotation as Hateoas;
+
+/**
+ * @Hateoas\Relation(
+ *      "self",
+ *      href = @Hateoas\Route(
+ *          "detailEquipe",
+ *          parameters = { "id" = "expr(object.getId())" }
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(groups="equipe")
+ * )
+ *
+ * @Hateoas\Relation(
+ *       "delete",
+ *       href = @Hateoas\Route(
+ *           "deleteEquipe",
+ *           parameters = { "id" = "expr(object.getId())" },
+ *       ),
+ *       exclusion = @Hateoas\Exclusion(groups="equipe", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ *  )
+ *
+ * @Hateoas\Relation(
+ *       "update",
+ *       href = @Hateoas\Route(
+ *           "updateEquipe",
+ *           parameters = { "id" = "expr(object.getId())" },
+ *       ),
+ *       exclusion = @Hateoas\Exclusion(groups="equipe", excludeIf = "expr(not is_granted('ROLE_ADMIN'))"),
+ *  )
+ */
 
 #[ORM\Entity(repositoryClass: EquipeRepository::class)]
 class Equipe
