@@ -20,6 +20,41 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use OpenApi\Annotations as OA;
+
+/**
+ * Cette méthode permet de récupérer l'ensemble des équipes.
+ *
+ * @OA\Response(
+ *     response=200,
+ *     description="Retourne la liste des équipes",
+ *     @OA\JsonContent(
+ *        type="array",
+ *        @OA\Items(ref=@Model(type=Equipe::class, groups={"equipe"}))
+ *     )
+ * )
+ * @OA\Parameter(
+ *     name="page",
+ *     in="query",
+ *     description="La page que l'on veut récupérer",
+ *     @OA\Schema(type="int")
+ * )
+ *
+ * @OA\Parameter(
+ *     name="limit",
+ *     in="query",
+ *     description="Le nombre d'éléments que l'on veut récupérer",
+ *     @OA\Schema(type="int")
+ * )
+ * @OA\Tag(name="Equipe")
+ *
+ * @param EquipeRepository $bookRepository
+ * @param SerializerInterface $serializer
+ * @param Request $request
+ * @return JsonResponse
+ */
 
 class EquipeController extends AbstractController
 {
