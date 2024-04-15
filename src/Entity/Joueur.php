@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\JoueurRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation\Groups;
@@ -39,6 +40,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  */
 
 #[ORM\Entity(repositoryClass: JoueurRepository::class)]
+#[ApiResource()]
 class Joueur
 {
     #[ORM\Id]
